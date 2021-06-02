@@ -2,6 +2,7 @@ import canvas
 import color
 
 import math
+from io import StringIO
 
 MAX_COLOR_VALUE = 255
 
@@ -50,25 +51,28 @@ class FixedLiner:
     def __init__(self, max_width):
         self._width = max_width
         self._cur_len = 0
-        self._data = ""
+        self._data = StringIO()
 
     def add(self, obj):
         if self._cur_len + len(obj) >= self._width:
-            self._data = self._data + '\n'
+            self._data.write('\n')
             self._cur_len = 0
 
         if self._cur_len == 0:
-            self._data += obj
+            self._data.write(obj)
         else:
-            self._data = self._data + ' ' + obj
+            self._data.write(' ' + obj)
             # Account for ' '
             self._cur_len += 1
 
         self._cur_len += len(obj)
 
     def new_row(self):
-        self._data = self._data + '\n'
+        self._data.write('\n')
         self._cur_len = 0
 
     def __str__(self):
-        return self._data + '\n'
+        self._data.seek(0)
+        data = self._data.read()
+        self._data.seek(0, 2)
+        return data
