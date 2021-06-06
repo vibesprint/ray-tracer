@@ -20,7 +20,7 @@ def clock_hand_generator(init_hand):
 
 def main():
     print('[+] Making canvas of 20 by 20 pixels')
-    canv = canvas.canvas(80, 80)
+    canv = canvas.canvas(200, 200)
     generate_hands(canv)
     print('[+] Generating ppm data ...')
     ppm_data = ppm.canvas_to_ppm(canv)
