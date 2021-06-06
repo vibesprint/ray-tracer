@@ -11,6 +11,8 @@ def vector(x, y, z):
 
 
 def equals(p1, p2):
+    if len(p1) != len(p2):
+        return False
     for i, j in zip(p1, p2):
         if abs( i-j ) > EPSILON:
             return False

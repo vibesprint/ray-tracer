@@ -13,7 +13,7 @@ def test_vector():
 
 def test_equals():
     vec1 = base.point(3.2, 3.1, 8.3)
-    assert base.equals(vec1, (3.20000001, 3.100000001, 8.3000000001))
+    assert base.equals(vec1, base.point(3.20000001, 3.100000001, 8.3000000001))
 
 
 def test_add():
