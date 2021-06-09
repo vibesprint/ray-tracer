@@ -32,7 +32,7 @@ def mul(mat1, mat2):
 def column_vector(lst):
     return numpy.ndarray((len(lst), 1), buffer=numpy.array(lst), dtype=float)
 
-def identity_matrix(n):
+def identity_matrix(n=4):
     return numpy.identity(n)
 
 def transpose(mat):
