@@ -3,6 +3,7 @@ import math
 
 import base
 import transformation
+import matrix
 
 ray = namedtuple("ray", "origin direction")
 
@@ -29,6 +30,7 @@ class intersections:
         return iter(self._data)
 
 def intersect(shape, ray_):
+    ray_ = transform(ray_, matrix.inverse(shape.transform))
     sphere_to_ray = base.sub(ray_.origin, base.point(0, 0, 0))
     a = base.dot(ray_.direction, ray_.direction)
     b = 2 * base.dot(ray_.direction, sphere_to_ray)
