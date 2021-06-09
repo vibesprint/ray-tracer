@@ -1,6 +1,7 @@
 import ray
 import base
 import shapes
+import transformation as transform
 
 
 def test_ray():
@@ -162,3 +163,32 @@ def test_hit4():
     i4 = ray.intersection(2, s)
     ints = ray.intersections(i1, i2, i3, i4)
     assert ray.hit(ints) == i4
+
+
+def test_transform():
+    r = ray.ray(base.point(1, 2, 3), base.vector(0, 1, 0))
+    m = transform.translation(3, 4, 5)
+    r2 = ray.transform(r, m)
+    assert base.equals(
+            r2.origin,
+            base.point(4, 6, 8)
+            )
+    assert base.equals(
+            r2.direction,
+            base.vector(0, 1, 0)
+            )
+
+def test_transform2():
+    """Scaling a ray"""
+    r = ray.ray(base.point(1, 2, 3), base.vector(0, 1, 0))
+    m = transform.scale(2, 3, 4)
+    r2 = ray.transform(r, m)
+    assert base.equals(
+            r2.origin,
+            base.point(2, 6, 12)
+            )
+
+    assert base.equals(
+            r2.direction,
+            base.vector(0, 3, 0)
+            )

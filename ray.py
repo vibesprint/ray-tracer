@@ -2,6 +2,7 @@ from collections import namedtuple
 import math
 
 import base
+import transformation
 
 ray = namedtuple("ray", "origin direction")
 
@@ -52,3 +53,9 @@ def hit(ints):
         if i.t >= 0:
             return i
     return None
+
+
+def transform(r, trans):
+    origin = transformation.apply(trans, r.origin)
+    direction = transformation.apply(trans, r.direction)
+    return ray(origin, direction)
