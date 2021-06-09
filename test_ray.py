@@ -192,3 +192,24 @@ def test_transform2():
             r2.direction,
             base.vector(0, 3, 0)
             )
+
+
+def test_intersect7():
+    """Intersecting a scaled sphere with a ray"""
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    s = shapes.sphere()
+    t = transform.scale(2, 2, 2)
+    s.set_transform(t)
+    ints = ray.intersect(s, r)
+    assert ints.count == 2
+    assert ints[0].t == 3
+    assert  ints[1].t == 7
+
+
+def test_intersectt8():
+    """Intersecting a translated sphere with a ray"""
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    s = shapes.sphere()
+    s.set_transform(transform.translation(5, 0, 0))
+    ints = ray.intersect(s, r)
+    assert ints.count == 0
