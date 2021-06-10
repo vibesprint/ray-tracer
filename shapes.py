@@ -3,6 +3,7 @@ from collections import namedtuple
 import matrix
 import base
 import transformation as transform
+import material
 
 import math
 
@@ -11,6 +12,7 @@ class sphere:
     def __init__(self):
         self.transform = matrix.identity_matrix()
         self.origin = base.point(0, 0, 0)
+        self.material = material.material()
 
     def set_transform(self, t):
         self.transform = t
@@ -27,3 +29,12 @@ def normal_at(sphere, pt):
             object_normal)
     world_normal[3] = 0
     return base.normalize(world_normal)
+
+def reflect(vect, normal):
+    return base.sub(
+            vect,
+            base.scalar_mul(
+                normal,
+                2 * base.dot(vect, normal)
+                )
+            )
