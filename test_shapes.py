@@ -2,6 +2,7 @@ import shapes
 import transformation as transform
 import matrix
 import base
+import material
 
 import math
 
@@ -81,3 +82,34 @@ def test_normal_at7():
             n,
             base.vector(0, 0.97014, -0.24254)
             )
+
+
+def test_reflect():
+    v = base.vector(1, -1, 0)
+    n = base.vector(0, 1, 0)
+    r = shapes.reflect(v, n)
+    assert base.equals(r, base.vector(1, 1, 0))
+
+def test_reflect2():
+    """Reflecting off a slanted surface"""
+    v = base.vector(0, -1, 0)
+    const = math.sqrt(2) / 2
+    n = base.vector(const, const, 0)
+    r = shapes.reflect(v, n)
+    assert base.equals(r, base.vector(1, 0, 0))
+
+
+def test_sphere3():
+    """Sphere has default material"""
+    s = shapes.sphere()
+    m = material.material()
+    assert m == s.material
+
+
+def test_sphere3():
+    """Sphere can be assigned a material"""
+    s = shapes.sphere()
+    m = material.material()
+    m.ambient = 1
+    s.material = m
+    assert s.material == m
