@@ -15,17 +15,17 @@ def blue(col):
 
 
 def add(col1, col2):
-    return (i+j for i,j in zip(col1, col2))
+    return tuple(i+j for i,j in zip(col1, col2))
 
 
 def sub(col1, col2):
-    return (i-j for i,j in zip(col1, col2))
+    return tuple(i-j for i,j in zip(col1, col2))
 
 def scalar_mul(col, scalar):
-    return (i*scalar for i in col)
+    return tuple(i*scalar for i in col)
 
 def hadamard_mul(col1, col2):
-    return (i*j for i, j in zip(col1, col2))
+    return tuple(i*j for i, j in zip(col1, col2))
 
 def equals(col1, col2):
     for i, j in zip(col1, col2):
