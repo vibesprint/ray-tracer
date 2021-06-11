@@ -6,6 +6,10 @@ class point_light:
         self.intensity = intensity
         self.position = position
 
+    def __eq__(self, other):
+        return color.equals(self.intensity, other.intensity) and \
+                base.equals(self.position, other.position)
+
 
 def reflect(vect, normal):
     return base.sub(

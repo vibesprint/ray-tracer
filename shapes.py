@@ -17,6 +17,11 @@ class sphere:
     def set_transform(self, t):
         self.transform = t
 
+    def __eq__(self, other):
+        return matrix.equals(self.transform, other.transform) and \
+                base.equals(self.origin, other.origin) and \
+                self.material == other.material
+
 
 def normal_at(sphere, pt):
     object_point = transform.apply(
