@@ -214,3 +214,53 @@ def test_compose():
             res,
             base.point(15, 0, 7)
             )
+
+
+def test_view_transform():
+    """the matrix for default orientation"""
+    frm = base.point(0, 0, 0)
+    to = base.point(0, 0, -1)
+    up = base.vector(0, 1, 0)
+    t = transform.view_transform(frm, to, up)
+    assert matrix.equals(
+            t,
+            matrix.identity_matrix()
+            )
+
+def test_view_transform2():
+    """view transformation matrix when looking in the positive z direction"""
+    frm = base.point(0, 0, 0)
+    to = base.point(0, 0, 1)
+    up = base.vector(0, 1, 0)
+    t = transform.view_transform(frm, to, up)
+    assert matrix.equals(
+            t,
+            transform.scale(-1, 1, -1)
+            )
+
+def test_view_transform3():
+    """The view transform moves the world"""
+    frm = base.point(0, 0, 8)
+    to = base.point(0, 0, 0)
+    up = base.vector(0, 1, 0)
+    t = transform.view_transform(frm, to, up)
+    assert matrix.equals(
+            t,
+            transform.translation(0, 0, -8)
+            )
+
+def test_view_transform4():
+    """Arbitrary view transformation"""
+    frm = base.point(1, 3, 2)
+    to = base.point(4, -2, 8)
+    up = base.vector(1, 1, 0)
+    t = transform.view_transform(frm, to, up)
+    assert matrix.equals(
+            t,
+            matrix.matrix_from(
+                [[-0.50709, 0.50709, 0.67612, -2.36643],
+                 [0.76772, 0.60609, 0.12122, -2.82843],
+                 [-0.35857, 0.59761, -0.71714, 0.00000],
+                 [0, 0, 0, 1]]
+                )
+            )

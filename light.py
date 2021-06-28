@@ -22,10 +22,14 @@ def reflect(vect, normal):
 
 
 
-def lightning(material, light, point, eyev, normalv):
+def lightning(material, light, point, eyev, normalv, in_shadow=False):
     effective_color = color.hadamard_mul(material.color, light.intensity)
     lightv = base.normalize( base.sub(light.position, point) )
     ambient = color.scalar_mul(effective_color, material.ambient)
+
+    if in_shadow:
+        return ambient
+
     diffuse = None
     specular = None
 

@@ -1,4 +1,5 @@
 import matrix
+import base
 import math
 
 def translation(x, y, z):
@@ -70,3 +71,16 @@ def compose(*mats):
         result = matrix.mul(result, mat)
 
     return result
+
+def view_transform(frm, to, up):
+    forward = base.normalize(base.sub(to, frm))
+    upn = base.normalize(up)
+    left = base.cross(forward, upn)
+    true_up = base.cross(left, forward)
+    orientation = matrix.matrix_from(
+            [[left[0], left[1], left[2], 0],
+             [true_up[0], true_up[1], true_up[2], 0],
+             [-forward[0], -forward[1], -forward[2], 0],
+             [0, 0, 0, 1]]
+            )
+    return matrix.mul(orientation, translation(-frm[0], -frm[1], -frm[2]))
