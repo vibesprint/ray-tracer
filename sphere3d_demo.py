@@ -8,20 +8,28 @@ import color
 import light
 import transformation as transform
 
+import math
+
 
 def main():
-    CANVAS_WIDTH, CANVAS_HEIGHT = 100, 100
+    CANVAS_WIDTH, CANVAS_HEIGHT = 600, 600
     canv = canvas.canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
     red = color.color(1, 0, 0)
     sphere = shapes.sphere()
+    transformation = transform.compose(
+            transform.rotation_y(math.pi/6),
+            transform.rotation_z(math.pi/6),
+            transform.scale(1, 0.2, 1)
+            )
+    sphere.transform = transformation
     sphere.material.color = color.color(1, 0.2, 1)
     ray_origin = base.point(0, 0, -5)
 
-    lght_pos = base.point(0, 0, -10)
-    lght_color = color.color(1, 1, 1)
+    lght_pos = base.point(7, 5, -10)
+    lght_color = color.color(0.75, 1, 1)
     lght = light.point_light(lght_pos, lght_color)
 
-    canvas_pixels = 100
+    canvas_pixels = CANVAS_WIDTH
     wall_z = 10
     wall_size = 7
     pixel_size = wall_size / canvas_pixels

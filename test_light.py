@@ -66,3 +66,16 @@ def test_lightning5():
     lght = light.point_light(base.point(0, 0, 10), color.color(1, 1, 1))
     result = light.lightning(m, lght, position, eyev, normalv)
     assert base.equals(result, color.color(0.1, 0.1, 0.1))
+
+
+def test_lightning6():
+    m, position = lightning_test_setup()
+    eyev = base.vector(0, 0, -1)
+    normalv = base.vector(0, 0, -1)
+    lght = light.point_light(
+            base.point(0, 0, -10),
+            color.color(1, 1, 1)
+            )
+    in_shadow = True
+    result = light.lightning(m, lght, position, eyev, normalv, in_shadow)
+    assert color.equals(result, color.color(0.1, 0.1, 0.1))
