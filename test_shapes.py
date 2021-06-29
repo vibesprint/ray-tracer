@@ -3,6 +3,7 @@ import transformation as transform
 import matrix
 import base
 import material
+import ray
 
 import math
 
@@ -118,7 +119,11 @@ def test_sphere3():
 def default_shape():
 
     class TestShape(shapes.Shape):
-        pass
+        def local_intersect(self, ray_):
+            self.saved_ray = ray_
+
+        def local_normal_at(self, local_pt):
+            return base.vector(local_pt[0], local_pt[1], local_pt[2])
 
     return TestShape()
 
@@ -147,3 +152,96 @@ def test_shape4():
     m.ambient = 1
     s.material = m
     assert s.material == m
+
+def test_shape5():
+    s = default_shape()
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    s.transform = transform.scale(2, 2, 2)
+    xs = ray.intersect(s, r)
+    assert base.equals(
+            s.saved_ray.origin,
+            base.point(0, 0, -2.5)
+            )
+    assert base.equals(
+            s.saved_ray.direction,
+            base.vector(0, 0, 0.5)
+            )
+
+
+def test_shape6():
+    """Intersecting a translated ray with a shape"""
+    s = default_shape()
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    s.transform = transform.translation(5, 0, 0)
+    xs = ray.intersect(s, r)
+    assert base.equals(
+            s.saved_ray.origin,
+            base.point(-5, 0, -5)
+            )
+    assert base.equals(
+            s.saved_ray.direction,
+            base.vector(0, 0, 1)
+            )
+
+def test_shape7():
+    """Computing the normal on a translated shape"""
+    s = default_shape()
+    s.transform = transform.translation(0, 1, 0)
+    n = shapes.normal_at(s, base.point(0, 1.70711, -0.70711))
+    assert base.equals(n, base.vector(0, 0.70711, -0.70711))
+
+def test_shape8():
+    """Computing normal on a transformed shape"""
+    s = default_shape()
+    s.transform = transform.compose(
+            transform.scale(1, 0.5, 1),
+            transform.rotation_z(math.pi/5)
+            )
+
+    n = shapes.normal_at(s, base.point(0, math.sqrt(2)/2, -math.sqrt(2)/2))
+    assert base.equals(
+            n,
+            base.vector(0, 0.97014, -0.24254)
+            )
+
+
+def test_plane():
+    p = shapes.plane()
+    n1 = p.local_normal_at(base.point(0, 0, 0))
+    n2 = p.local_normal_at(base.point(10, 0, -10))
+    n3 = p.local_normal_at(base.point(-5, 0, 150))
+    assert base.equals(n1, base.vector(0, 1, 0))
+    assert base.equals(n2, base.vector(0, 1, 0))
+    assert base.equals(n3, base.vector(0, 1, 0))
+
+def test_plane2():
+    """Intersect with a parallel ray"""
+    p = shapes.plane()
+    r = ray.ray(base.point(0, 10, 0), base.vector(0, 0, 1))
+    ints = p.local_intersect(r)
+    assert ints.count == 0
+
+def test_plane3():
+    """Intersect with a coplanar ray"""
+    p = shapes.plane()
+    r = ray.ray(base.point(0, 0, 0), base.vector(0, 0, 1))
+    xs = p.local_intersect(r)
+    assert xs.count == 0
+
+def test_plane4():
+    """Ray intersecting from above"""
+    p = shapes.plane()
+    r = ray.ray(base.point(0, 1, 0), base.vector(0, -1, 0))
+    xs = p.local_intersect(r)
+    assert xs.count == 1
+    xs[0].t == 1
+    xs[0].object == p
+
+def test_plane5():
+    """Ray intersecting from below"""
+    p = shapes.plane()
+    r = ray.ray(base.point(0, -1, 0), base.vector(0, 1, 0))
+    xs = p.local_intersect(r)
+    assert xs.count == 1
+    assert xs[0].t == 1
+    assert xs[0].object == p
