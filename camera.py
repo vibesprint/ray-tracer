@@ -51,17 +51,15 @@ def ray_for_pixel(cam, px, py):
     return ray.ray(origin, direction)
 
 
-def render(cam, wrld, progress_bar=False):
+def render(cam, wrld, *, progress_bar=False, **opts):
     img = canvas.canvas(cam.hsize, cam.vsize)
     if progress_bar:
-        vrange = tqdm(range(cam.vsize))
-        hrange = tqdm(range(cam.hsize))
+        vrange = tqdm(range(cam.vsize), **opts)
     else:
         vrange = range(cam.vsize)
-        hrange = range(cam.hsize)
 
     for y in vrange:
-        for x in hrange:
+        for x in range(cam.hsize):
             r = ray_for_pixel(cam, x, y)
             col = world.color_at(wrld, r)
             canvas.write_pixel(img, x, y, col)

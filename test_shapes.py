@@ -113,3 +113,37 @@ def test_sphere3():
     m.ambient = 1
     s.material = m
     assert s.material == m
+
+
+def default_shape():
+
+    class TestShape(shapes.Shape):
+        pass
+
+    return TestShape()
+
+def test_shape():
+    s = default_shape()
+    assert matrix.equals(
+            s.transform,
+            matrix.identity_matrix()
+            )
+
+def test_shape2():
+    s = default_shape()
+    s.transform = transform.translation(2, 3, 4)
+    assert matrix.equals(
+            s.transform,
+            transform.translation(2, 3, 4)
+            )
+
+def test_shape3():
+    s = default_shape()
+    assert s.material == material.material()
+
+def test_shape4():
+    s = default_shape()
+    m = material.material()
+    m.ambient = 1
+    s.material = m
+    assert s.material == m
