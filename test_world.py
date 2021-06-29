@@ -164,3 +164,31 @@ def test_is_shadowed():
 
     p = base.point(-2, 2, -2)
     assert world.is_shadowed(w, p) == False
+
+
+def test_shade_hit3():
+    w = world.world()
+    w.light_source = light.point_light(base.point(0, 0, -10), color.color(1, 1, 1))
+    s1 = shapes.sphere()
+    w.add_objs(s1)
+
+    s2 = shapes.sphere()
+    s2.transform = transform.translation(0, 0, 10)
+    w.add_objs(s2)
+
+    r = ray.ray(base.point(0, 0, 5), base.vector(0, 0, 1))
+    i = ray.intersection(4, s2)
+    comps = world.prepare_computations(i, r)
+    c = world.shade_hit(w, comps)
+    assert color.equals(c, color.color(0.1, 0.1, 0.1))
+
+def test_prepare_computations4():
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    shape = shapes.sphere()
+    shape.transform = transform.translation(0, 0, 1)
+    i = ray.intersection(5, shape)
+    comps = world.prepare_computations(i, r)
+
+    EPSILON = 0.00001
+    assert comps.over_point[2] < -world.EPSILON/2
+    assert comps.point[2] > comps.over_point[2]

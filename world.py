@@ -21,9 +21,10 @@ def intersect_world(wrld, r):
 
 
 class computation:
-    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside"]
+    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point"]
     pass
 
+EPSILON = 0.00001
 def prepare_computations(i, r):
     comps = computation()
     comps.t = i.t
@@ -36,13 +37,17 @@ def prepare_computations(i, r):
         comps.inside = True
         comps.normalv = base.negate(comps.normalv)
 
+    comps.over_point = base.add(comps.point, base.scalar_mul(comps.normalv, EPSILON))
+
     return comps
 
 
 def shade_hit(w, comps):
+    shadowed = is_shadowed(w, comps.over_point)
     return light.lightning(comps.object.material,
             w.light_source,
-            comps.point, comps.eyev, comps.normalv)
+            comps.over_point, comps.eyev, comps.normalv,
+            shadowed)
 
 
 def color_at(wrld, r):

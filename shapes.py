@@ -7,12 +7,16 @@ import material
 
 import math
 
+class Shape:
+    def __init__(self):
+        self.transform = matrix.identity_matrix()
+        self.material = material.material()
 
 class sphere:
     def __init__(self):
         self.transform = matrix.identity_matrix()
-        self.origin = base.point(0, 0, 0)
         self.material = material.material()
+        self.origin = base.point(0, 0, 0)
 
     def set_transform(self, t):
         self.transform = t
