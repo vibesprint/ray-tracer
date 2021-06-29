@@ -31,23 +31,7 @@ class intersections:
 
 def intersect(shape, ray_):
     ray_ = transform(ray_, matrix.inverse(shape.transform))
-    sphere_to_ray = base.sub(ray_.origin, base.point(0, 0, 0))
-    a = base.dot(ray_.direction, ray_.direction)
-    b = 2 * base.dot(ray_.direction, sphere_to_ray)
-    c = base.dot(sphere_to_ray, sphere_to_ray) - 1
-
-    discrim = b*b - 4*a*c
-
-    if discrim < 0:
-        return intersections()
-
-    t1 = (-b - math.sqrt(discrim)) / (2*a)
-    t2 = (-b + math.sqrt(discrim)) / (2*a)
-
-    return intersections(
-            intersection(t1, shape),
-            intersection(t2, shape)
-            )
+    return shape.local_intersect(ray_)
 
 
 def hit(ints):

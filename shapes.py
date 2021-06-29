@@ -4,6 +4,8 @@ import matrix
 import base
 import transformation as transform
 import material
+import ray
+import utils
 
 import math
 
@@ -12,10 +14,13 @@ class Shape:
         self.transform = matrix.identity_matrix()
         self.material = material.material()
 
-class sphere:
+    def __eq__(self, other):
+        return matrix.equals(self.transform, other.transform) and \
+                self.material == other.material
+
+class sphere(Shape):
     def __init__(self):
-        self.transform = matrix.identity_matrix()
-        self.material = material.material()
+        Shape.__init__(self)
         self.origin = base.point(0, 0, 0)
 
     def set_transform(self, t):
@@ -23,19 +28,44 @@ class sphere:
 
     def __eq__(self, other):
         return matrix.equals(self.transform, other.transform) and \
-                base.equals(self.origin, other.origin) and \
                 self.material == other.material
 
+    def local_intersect(self, ray_):
+        sphere_to_ray = base.sub(ray_.origin, base.point(0, 0, 0))
+        a = base.dot(ray_.direction, ray_.direction)
+        b = 2 * base.dot(ray_.direction, sphere_to_ray)
+        c = base.dot(sphere_to_ray, sphere_to_ray) - 1
 
-def normal_at(sphere, pt):
-    object_point = transform.apply(
-            matrix.inverse(sphere.transform),
+        discrim = b*b - 4*a*c
+
+        if discrim < 0:
+            return ray.intersections()
+
+        t1 = (-b - math.sqrt(discrim)) / (2*a)
+        t2 = (-b + math.sqrt(discrim)) / (2*a)
+
+        return ray.intersections(
+                ray.intersection(t1, self),
+                ray.intersection(t2, self)
+                )
+
+    def local_normal_at(self, local_pt):
+        return base.sub(local_pt, base.point(0, 0, 0))
+
+
+
+def normal_at(shape, pt):
+    local_point = transform.apply(
+            matrix.inverse(shape.transform),
             pt)
 
-    object_normal = base.sub(object_point, base.point(0, 0, 0))
+    local_normal = shape.local_normal_at(local_point)
+
     world_normal = matrix.mul(
-            matrix.transpose(matrix.inverse(sphere.transform)),
-            object_normal)
+            matrix.transpose(matrix.inverse(shape.transform)),
+            local_normal
+            )
+
     world_normal[3] = 0
     return base.normalize(world_normal)
 
@@ -47,3 +77,19 @@ def reflect(vect, normal):
                 2 * base.dot(vect, normal)
                 )
             )
+
+
+class plane(Shape):
+    def __init__(self):
+        Shape.__init__(self)
+
+    def local_normal_at(self, local_pt):
+        return base.vector(0, 1, 0)
+
+    def local_intersect(self, ray_):
+        if utils.fequals(ray_.direction[1], 0):
+            return ray.intersections()
+        t = -ray_.origin[1]/ray_.direction[1]
+        return ray.intersections(
+                ray.intersection(t, self)
+                )
