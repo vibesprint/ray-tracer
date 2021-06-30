@@ -45,6 +45,7 @@ def prepare_computations(i, r):
 def shade_hit(w, comps):
     shadowed = is_shadowed(w, comps.over_point)
     return light.lightning(comps.object.material,
+            comps.object,
             w.light_source,
             comps.over_point, comps.eyev, comps.normalv,
             shadowed)
