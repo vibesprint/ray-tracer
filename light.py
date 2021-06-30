@@ -22,8 +22,13 @@ def reflect(vect, normal):
 
 
 
-def lightning(material, light, point, eyev, normalv, in_shadow=False):
-    effective_color = color.hadamard_mul(material.color, light.intensity)
+def lightning(material, obj, light, point, eyev, normalv, in_shadow=False):
+    if material.pattern is not None:
+        col = material.pattern.pattern_at_shape(obj, point)
+    else:
+        col = material.color
+
+    effective_color = color.hadamard_mul(col, light.intensity)
     lightv = base.normalize( base.sub(light.position, point) )
     ambient = color.scalar_mul(effective_color, material.ambient)
 

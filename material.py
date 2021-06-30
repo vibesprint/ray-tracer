@@ -8,6 +8,7 @@ class material:
         self.diffuse = 0.9
         self.specular = 0.9
         self.shininess = 200.0
+        self.pattern = None
 
 
     def __eq__(self, other):
