@@ -53,11 +53,13 @@ def ray_for_pixel(cam, px, py):
 
 
 def _worker(cam, wrld, row, cols, outqueue):
-    print(f"Started as worker: {mp.current_process()}")
-    for x in range(cols):
-        r = ray_for_pixel(cam, x, row)
-        col = world.color_at(wrld, r)
-        outqueue.put((x, row, col))
+    try:
+        for x in range(cols):
+            r = ray_for_pixel(cam, x, row)
+            col = world.color_at(wrld, r)
+            outqueue.put((x, row, col))
+    except:
+        return
 
 
 def render(cam, wrld, *, progress_bar=False, **opts):
@@ -67,13 +69,11 @@ def render(cam, wrld, *, progress_bar=False, **opts):
     outqueue = manager.Queue()
 
     with mp.Pool(mp.cpu_count()) as pool:
-        # print(f"Starting workers ...")
         results = []
         for i in range(cam.vsize):
             results.append(pool.apply_async(_worker, args=(cam, wrld, i, cam.hsize, outqueue)))
 
 
-        # print(f"No. of processes: {len(procs)}")
 
         if progress_bar:
             opts.update({'unit': "row"})
@@ -81,9 +81,7 @@ def render(cam, wrld, *, progress_bar=False, **opts):
         else:
             row_range = range(cam.vsize)
 
-        # print(f"Waiting for completed works ...")
         for i in row_range:
-            # print(f"Waiting for pixel {i}")
             for _ in range(cam.hsize):
                 x, y, col = outqueue.get()
                 canvas.write_pixel(img, x, y, col)
