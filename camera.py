@@ -76,7 +76,7 @@ def render(cam, wrld, *, progress_bar=False, **opts):
         # print(f"No. of processes: {len(procs)}")
 
         if progress_bar:
-            opts.update({'unit': "pixel"})
+            opts.update({'unit': "row"})
             row_range = tqdm(range(cam.vsize), **opts)
         else:
             row_range = range(cam.vsize)
