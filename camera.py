@@ -52,52 +52,44 @@ def ray_for_pixel(cam, px, py):
     return ray.ray(origin, direction)
 
 
-def _worker(cam, wrld, inqueue, outqueue):
+def _worker(cam, wrld, row, cols, outqueue):
     print(f"Started as worker: {mp.current_process()}")
-    for x, y in iter(inqueue.get, "STOP"):
-        r = ray_for_pixel(cam, x, y)
+    for x in range(cols):
+        r = ray_for_pixel(cam, x, row)
         col = world.color_at(wrld, r)
-        outqueue.put((x, y, col))
+        outqueue.put((x, row, col))
 
 
 def render(cam, wrld, *, progress_bar=False, **opts):
     img = canvas.canvas(cam.hsize, cam.vsize)
 
-    inqueue = mp.Queue()
-    outqueue = mp.Queue()
+    manager = mp.Manager()
+    outqueue = manager.Queue()
 
-    # print(f"Starting workers ...")
-    procs = [mp.Process(target=_worker, args=(cam, wrld, inqueue, outqueue)) for _ in range(mp.cpu_count())]
+    with mp.Pool(mp.cpu_count()) as pool:
+        # print(f"Starting workers ...")
+        results = []
+        for i in range(cam.vsize):
+            results.append(pool.apply_async(_worker, args=(cam, wrld, i, cam.hsize, outqueue)))
 
-    # print(f"No. of processes: {len(procs)}")
 
-    # print(f"Starting processes ...")
-    for p in procs:
-        p.start()
+        # print(f"No. of processes: {len(procs)}")
 
-    # print(f"Distributing work ...")
-    for y in range(cam.vsize):
-        for x in range(cam.hsize):
-            inqueue.put((x, y))
+        if progress_bar:
+            opts.update({'unit': "pixel"})
+            row_range = tqdm(range(cam.vsize), **opts)
+        else:
+            row_range = range(cam.vsize)
 
-    # print(f"Putting stop marker ...")
-    for i in range(mp.cpu_count()+10):
-        inqueue.put("STOP")
+        # print(f"Waiting for completed works ...")
+        for i in row_range:
+            # print(f"Waiting for pixel {i}")
+            for _ in range(cam.hsize):
+                x, y, col = outqueue.get()
+                canvas.write_pixel(img, x, y, col)
 
-    if progress_bar:
-        opts.update({'unit': "pixel"})
-        pixel_range = tqdm(range(cam.vsize*cam.hsize), **opts)
-    else:
-        pixel_range = range(cam.vsize*cam.hsize)
+        pool.close()
+        pool.join()
 
-    # print(f"Waiting for completed works ...")
-    for i in pixel_range:
-        # print(f"Waiting for pixel {i}")
-        x, y, col = outqueue.get()
-        canvas.write_pixel(img, x, y, col)
-
-    # print(f"Joining the processes ...")
-    for p in procs:
-        p.join()
 
     return img
