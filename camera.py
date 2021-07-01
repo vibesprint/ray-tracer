@@ -52,73 +52,52 @@ def ray_for_pixel(cam, px, py):
     return ray.ray(origin, direction)
 
 
+def _worker(cam, wrld, inqueue, outqueue):
+    print(f"Started as worker: {mp.current_process()}")
+    for x, y in iter(inqueue.get, "STOP"):
+        r = ray_for_pixel(cam, x, y)
+        col = world.color_at(wrld, r)
+        outqueue.put((x, y, col))
+
+
 def render(cam, wrld, *, progress_bar=False, **opts):
     img = canvas.canvas(cam.hsize, cam.vsize)
-    blocks = divide(cam.hsize, cam.vsize, mp.cpu_count())
 
-    # print("No. of blocks: ", blocks)
+    inqueue = mp.Queue()
+    outqueue = mp.Queue()
 
+    # print(f"Starting workers ...")
+    procs = [mp.Process(target=_worker, args=(cam, wrld, inqueue, outqueue)) for _ in range(mp.cpu_count())]
 
-    with mp.Pool(processes=mp.cpu_count()) as pool:
-        # args = [(cam, wrld, hrange, vrange, img, queue) for hrange, vrange in blocks]
-        queue = mp.Queue()
-        args = [(cam, wrld, row, cam.hsize, img, queue) for row in range(cam.vsize)]
+    # print(f"No. of processes: {len(procs)}")
 
-        results = [ pool.apply_async(_render, arg) for arg in args ]
-        # results = pool.imap(_render, args)
+    # print(f"Starting processes ...")
+    for p in procs:
+        p.start()
 
-        # print(f"No. of processes: {len(procs)}")
-        # for proc in procs:
-        #     proc.start()
+    # print(f"Distributing work ...")
+    for y in range(cam.vsize):
+        for x in range(cam.hsize):
+            inqueue.put((x, y))
 
-        # for _ in tqdm(range(cam.vsize * cam.hsize)):
-        #     queue.get()
+    # print(f"Putting stop marker ...")
+    for i in range(mp.cpu_count()+10):
+        inqueue.put("STOP")
 
-        print(f"No. of cells expected: {cam.hsize * cam.vsize}")
-        if progress_bar:
-            pixel_range = tqdm(range(cam.hsize*cam.vsize), **opts)
-        else:
-            pixel_range = range(cam.hsize * cam.vsize)
+    if progress_bar:
+        opts.update({'unit': "pixel"})
+        pixel_range = tqdm(range(cam.vsize*cam.hsize), **opts)
+    else:
+        pixel_range = range(cam.vsize*cam.hsize)
 
-        for i in pixel_range:
-            print(f"Waiting for pixel: {i}")
-            x, y, col = queue.get()
-            print(f"Coordinates: {x}, {y}")
-            canvas.write_pixel(img, x, y, col)
+    # print(f"Waiting for completed works ...")
+    for i in pixel_range:
+        # print(f"Waiting for pixel {i}")
+        x, y, col = outqueue.get()
+        canvas.write_pixel(img, x, y, col)
 
-        pool.join()
-
-    # for proc in procs:
-    #     proc.join()
+    # print(f"Joining the processes ...")
+    for p in procs:
+        p.join()
 
     return img
-
-
-
-def _render(cam, wrld, row, cols, img, queue):
-
-    print(f"Started render function: {mp.current_process()}")
-    for y in range(cols):
-        r = ray_for_pixel(cam, y, row)
-        col = world.color_at(wrld, r)
-        queue.put((y, row, col))
-
-
-def divide(width, height, count):
-    block_width = width // count
-    block_height = height // count
-
-    if block_width == 0 or block_height == 0:
-        return [(range(width), range(height))]
-
-    result = []
-
-    cur_w = 0
-    while cur_w < width:
-        cur_h = 0
-        while cur_h < height:
-            result.append((range(cur_w, cur_w + block_width), range(cur_h, cur_h + block_height)))
-            cur_h += block_height
-        cur_w += block_width
-
-    return result
