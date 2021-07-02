@@ -93,3 +93,9 @@ class plane(Shape):
         return ray.intersections(
                 ray.intersection(t, self)
                 )
+
+class glass_sphere(sphere):
+    def __init__(self):
+        sphere.__init__(self)
+        self.material.transparency = 1.0
+        self.material.refractive_index = 1.5

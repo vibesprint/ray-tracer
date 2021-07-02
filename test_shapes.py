@@ -4,6 +4,7 @@ import matrix
 import base
 import material
 import ray
+import utils
 
 import math
 
@@ -245,3 +246,10 @@ def test_plane5():
     assert xs.count == 1
     assert xs[0].t == 1
     assert xs[0].object == p
+
+
+def test_glass_sphere():
+    s = shapes.glass_sphere()
+    assert matrix.equals(s.transform, matrix.identity_matrix())
+    assert utils.fequals(s.material.transparency, 1)
+    assert utils.fequals(s.material.refractive_index, 1.5)

@@ -16,3 +16,9 @@ def test_material():
 def test_reflective():
     m = material.material()
     assert utils.fequals(m.reflective, 0.0)
+
+
+def test_refraction():
+    m = material.material()
+    assert utils.fequals(m.refractive_index, 1)
+    assert utils.fequals(m.transparency, 0)

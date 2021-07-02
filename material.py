@@ -10,6 +10,8 @@ class material:
         self.shininess = 200.0
         self.pattern = None
         self.reflective = 0.0
+        self.refractive_index = 1
+        self.transparency = 0
 
 
     def __eq__(self, other):
