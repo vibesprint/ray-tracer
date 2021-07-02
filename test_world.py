@@ -6,6 +6,7 @@ import base
 import shapes
 import ray
 import transformation as transform
+import utils
 
 import math
 
@@ -276,3 +277,38 @@ def test_reflected_color3():
     comps = world.prepare_computations(i, r)
     col = world.reflected_color(w, comps, 0)
     assert color.equals(col, color.color(0, 0, 0))
+
+
+def refraction_test(idx, n1, n2):
+    A = shapes.glass_sphere()
+    A.transform = transform.scale(2, 2, 2)
+    A.material.refractive_index = 1.5
+
+    B = shapes.glass_sphere()
+    B.transform = transform.translation(0, 0, -0.25)
+    B.material.refractive_index = 2.0
+
+    C = shapes.glass_sphere()
+    C.transform = transform.translation(0, 0, 0.25)
+    C.material.refractive_index = 2.5
+
+    r = ray.ray(base.point(0, 0, -4), base.vector(0, 0, 1))
+    xs = ray.intersections(
+            ray.intersection(2, A),
+            ray.intersection(2.75, B),
+            ray.intersection(3.25, C),
+            ray.intersection(4.75, B),
+            ray.intersection(5.25, C),
+            ray.intersection(6, A)
+            )
+    comps = world.prepare_computations(xs[idx], r, xs)
+    assert utils.fequals(comps.n1, n1)
+    assert utils.fequals(comps.n2, n2)
+
+def test_prepare_computations6():
+    refraction_test(0, 1, 1.5)
+    refraction_test(1, 1.5, 2)
+    refraction_test(2, 2, 2.5)
+    refraction_test(3, 2.5, 2.5)
+    refraction_test(4, 2.5, 1.5)
+    refraction_test(5, 1.5, 1.0)

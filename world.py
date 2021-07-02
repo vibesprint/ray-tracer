@@ -23,11 +23,14 @@ def intersect_world(wrld, r):
 
 
 class computation:
-    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point", "reflectv"]
+    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point", "reflectv", "n1", "n2"]
     pass
 
 EPSILON = 0.00001
-def prepare_computations(i, r):
+def prepare_computations(i, r, ints=None):
+    if ints is None:
+        ints = ray.intersections(i)
+
     comps = computation()
     comps.t = i.t
     comps.object = i.object
@@ -42,7 +45,34 @@ def prepare_computations(i, r):
     comps.over_point = base.add(comps.point, base.scalar_mul(comps.normalv, EPSILON))
     comps.reflectv = light.reflect(r.direction, comps.normalv)
 
+
+    calculate_refractive_indices(i, r, ints, comps)
+
     return comps
+
+
+def calculate_refractive_indices(hit, r, xs, comps):
+    container = []
+    for i in xs:
+        if i == hit:
+            if len(container) == 0:
+                comps.n1 = 1.0
+            else:
+                comps.n1 = container[-1].material.refractive_index
+
+        if i.object in container:
+            container.remove(i.object)
+        else:
+            container.append(i.object)
+
+        if i == hit:
+            if len(container) == 0:
+                comps.n2 = 1.0
+            else:
+                comps.n2 = container[-1].material.refractive_index
+
+            break
+
 
 
 def shade_hit(w, comps, recur_thresh=4):
