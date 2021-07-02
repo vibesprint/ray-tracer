@@ -15,12 +15,13 @@ def make_walls():
     plane = shapes.plane()
     plane.material.color = color.color(1, 0.9, 0.9)
     plane.material.specular = 0
-    plane.material.pattern = patterns.stripe_pattern(
+    plane.material.pattern = patterns.checkers_pattern(
             color.color(0.9, 0.75, 0.8),
             color.color(0.9, 0.9, 0.9)
             )
 
     plane.material.pattern.transform = transform.rotation_y(math.pi/3)
+    plane.material.reflective = 0.7
 
     return (plane, )
 
@@ -34,7 +35,7 @@ def make_spheres():
     middle.material.color = color.color(0.1, 1, 0.5)
     middle.material.diffuse = 0.7
     middle.material.specular = 0.3
-    middle.material.pattern = patterns.stripe_pattern(
+    middle.material.pattern = patterns.ring_pattern(
             color.color(0.9, 0.75, 0.8),
             color.color(0.9, 0.9, 0.9)
             )
