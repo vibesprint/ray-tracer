@@ -4,6 +4,8 @@ import shapes
 import color
 import light
 
+import utils
+
 class world:
     def __init__(self):
         self.objects = []
@@ -21,7 +23,7 @@ def intersect_world(wrld, r):
 
 
 class computation:
-    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point"]
+    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point", "reflectv"]
     pass
 
 EPSILON = 0.00001
@@ -38,26 +40,29 @@ def prepare_computations(i, r):
         comps.normalv = base.negate(comps.normalv)
 
     comps.over_point = base.add(comps.point, base.scalar_mul(comps.normalv, EPSILON))
+    comps.reflectv = light.reflect(r.direction, comps.normalv)
 
     return comps
 
 
-def shade_hit(w, comps):
+def shade_hit(w, comps, recur_thresh=4):
     shadowed = is_shadowed(w, comps.over_point)
-    return light.lightning(comps.object.material,
+    surface = light.lightning(comps.object.material,
             comps.object,
             w.light_source,
             comps.over_point, comps.eyev, comps.normalv,
             shadowed)
+    reflected = reflected_color(w, comps, recur_thresh-1)
+    return base.add(surface, reflected)
 
 
-def color_at(wrld, r):
+def color_at(wrld, r, recur_thresh=4):
     ints = intersect_world(wrld, r)
     hit = ray.hit(ints)
     if hit is None:
         return color.color(0, 0, 0)
     comps = prepare_computations(hit, r)
-    return shade_hit(wrld, comps)
+    return shade_hit(wrld, comps, recur_thresh)
 
 def is_shadowed(wrld, point):
     vec = base.sub(wrld.light_source.position, point)
@@ -73,3 +78,10 @@ def is_shadowed(wrld, point):
         return True
 
     return False
+
+def reflected_color(wrld, comps, recur_thresh=4):
+    if utils.fequals(comps.object.material.reflective, 0) or recur_thresh < 0:
+        return color.color(0, 0, 0)
+    reflect_ray = ray.ray(comps.over_point, comps.reflectv)
+    col = color_at(wrld, reflect_ray, recur_thresh-1)
+    return base.scalar_mul(col, comps.object.material.reflective)
