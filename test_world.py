@@ -7,6 +7,8 @@ import shapes
 import ray
 import transformation as transform
 
+import math
+
 def test_world():
     wld = world.world()
     assert len(wld.objects) == 0
@@ -192,3 +194,85 @@ def test_prepare_computations4():
     EPSILON = 0.00001
     assert comps.over_point[2] < -world.EPSILON/2
     assert comps.point[2] > comps.over_point[2]
+
+
+def test_prepare_computations5():
+    r = ray.ray(base.point(0, 1, -1), base.vector(0, -math.sqrt(2)/2, math.sqrt(2)/2))
+    shape = shapes.plane()
+    i = ray.intersection(math.sqrt(2), shape)
+    comps = world.prepare_computations(i, r)
+    assert base.equals(comps.reflectv, base.vector(0, math.sqrt(2)/2, math.sqrt(2)/2))
+
+
+def test_reflected_color():
+    w = default_world()
+    r = ray.ray(base.point(0, 0, 0), base.vector(0, 0, 1))
+    shape = w.objects[1]
+    shape.material.ambient = 1
+    i = ray.intersection(1, shape)
+    comps = world.prepare_computations(i, r)
+    col = world.reflected_color(w, comps)
+    assert color.equals(col, color.color(0, 0, 0))
+
+
+def test_reflected_color2():
+    w = default_world()
+    shape = shapes.plane()
+    shape.material.reflective = 0.5
+    shape.transform = transform.translation(0, -1, 0)
+    w.add_objs(shape)
+    r = ray.ray(base.point(0, 0, -3), base.vector(0, -math.sqrt(2)/2, math.sqrt(2)/2))
+    i = ray.intersection(math.sqrt(2), shape)
+    comps = world.prepare_computations(i, r)
+    col = world.reflected_color(w, comps)
+    assert color.equals(
+            col,
+            color.color(0.190332, 0.237915, 0.1427491)
+            )
+
+
+def test_shade_hit4():
+    w = default_world()
+    shape = shapes.plane()
+    shape.material.reflective = 0.5
+    shape.transform = transform.translation(0, -1, 0)
+    w.add_objs(shape)
+    r = ray.ray(base.point(0, 0, -3), base.vector(0, -math.sqrt(2)/2, math.sqrt(2)/2))
+    i = ray.intersection(math.sqrt(2), shape)
+    comps = world.prepare_computations(i, r)
+    col = world.shade_hit(w, comps)
+    assert color.equals(
+            col,
+            color.color(0.876757, 0.9243403, 0.8291742)
+            )
+
+
+def test_halting():
+    """color_at should halt for mutually reflective surfaces and avoid infinite recursion"""
+    w = world.world()
+    w.light_source = light.point_light(base.point(0, 0, 0), color.color(1, 1, 1))
+    lower = shapes.plane()
+    lower.material.reflective = 1
+    lower.transform = transform.translation(0, -1, 0)
+
+    upper = shapes.plane()
+    upper.material.reflective = 1
+    upper.transform = transform.translation(0, 1, 0)
+
+    w.add_objs(lower, upper)
+    r = ray.ray(base.point(0, 0, 0), base.vector(0, 1, 0))
+
+    world.color_at(w, r) # This should terminate, otherwise python would raise exception due to recursion limit
+
+
+def test_reflected_color3():
+    w = default_world()
+    shape = shapes.plane()
+    shape.material.reflective = 0.5
+    shape.transform = transform.translation(0, -1, 0)
+    w.add_objs(shape)
+    r = ray.ray(base.point(0, 0, 0), base.vector(0, -math.sqrt(2)/2, math.sqrt(2)/2))
+    i = ray.intersection(math.sqrt(2), shape)
+    comps = world.prepare_computations(i, r)
+    col = world.reflected_color(w, comps, 0)
+    assert color.equals(col, color.color(0, 0, 0))
