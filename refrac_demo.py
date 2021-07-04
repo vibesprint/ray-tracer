@@ -13,16 +13,15 @@ import math
 def make_planes():
     vertical = shapes.plane()
     vertical.transform = transform.rotation_x(math.pi/2)
-    vertical.material.transparency = 1
-    vertical.material.reflectivity = 1
+    vertical.material.transparency = .9
+    vertical.material.reflectivity = .9
     vertical.material.refractive_index = 1.5
     vertical.material.color = color.color(.5, .5, .5)
     vertical.material.diffuse = 0.1
-    vertical.material.specular = 1
-    vertical.material.shininess = 300
+    vertical.material.specular = .9
 
     horizontal = shapes.plane()
-    horizontal.material.reflectivity = 1
+    horizontal.material.reflectivity = .9
     horizontal.material.color = color.color(.5, .5, .5)
 
     return horizontal, vertical
@@ -33,6 +32,7 @@ def make_spheres():
     back.transform = transform.translation(0, 1, -2)
 
     front = shapes.sphere()
+    front.material.color = color.color(0, 0, 1)
     front.transform = transform.translation(0, 1, 2)
 
     return front, back
@@ -44,12 +44,12 @@ def main():
     spheres = make_spheres()
 
     wrld = world.world()
-    wrld.light_source = light.point_light(base.point(-10, 10, 10), color.color(1, 1, 1))
+    wrld.light_source = light.point_light(base.point(-10, 7, -10), color.color(1, 1, 1))
     wrld.add_objs(*(planes + spheres))
 
     cam = camera.camera(600, 300, math.pi/2)
     cam.transform = transform.view_transform(
-            base.point(-1, 3, 3),
+            base.point(1, 3, -4),
             base.point(0, 1, 0),
             base.vector(0, 1, 0)
             )
