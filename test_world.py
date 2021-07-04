@@ -312,3 +312,189 @@ def test_prepare_computations6():
     refraction_test(3, 2.5, 2.5)
     refraction_test(4, 2.5, 1.5)
     refraction_test(5, 1.5, 1.0)
+
+def test_prepare_computations7():
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    shape = shapes.glass_sphere()
+    shape.transform = transform.translation(0, 0, 1)
+    i = ray.intersection(5, shape)
+    xs = ray.intersections(i)
+    comps = world.prepare_computations(i, r, xs)
+    EPSILON = 1e-5
+    assert comps.under_point[2] > EPSILON/2
+    assert comps.point[2] < comps.under_point[2]
+
+def test_refracted_color():
+    w = default_world()
+    shape = w.objects[0]
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    xs = ray.intersections(
+            ray.intersection(4, shape),
+            ray.intersection(4, shape)
+            )
+    comps = world.prepare_computations(xs[0], r, xs)
+    col = world.refracted_color(w, comps)
+    assert color.equals(
+            col,
+            color.color(0, 0, 0)
+            )
+
+
+def test_refracted_color2():
+    w = default_world()
+    shape = w.objects[0]
+    shape.material.transparency = 1.0
+    shape.material.refractive_index = 1.5
+    r = ray.ray(base.point(0, 0, -5), base.vector(0, 0, 1))
+    xs = ray.intersections(
+            ray.intersection(4, shape),
+            ray.intersection(4, shape)
+            )
+    comps = world.prepare_computations(xs[0], r, xs)
+    col = world.refracted_color(w, comps, 0)
+    assert color.equals(
+            col,
+            color.color(0, 0, 0)
+            )
+
+
+def test_refracted_color3():
+    """total internal reflection"""
+    w = default_world()
+    shape = w.objects[0]
+    shape.material.transparency = 1.
+    shape.material.refractive_index = 1.5
+    r = ray.ray(base.point(0, 0, math.sqrt(2)/2), base.vector(0, 1, 0))
+    xs = ray.intersections(
+            ray.intersection(-math.sqrt(2)/2, shape),
+            ray.intersection(math.sqrt(2)/2, shape)
+            )
+    comps = world.prepare_computations(xs[1], r, xs)
+    col = world.refracted_color(w, comps)
+    assert color.equals(
+            col,
+            color.color(0, 0, 0)
+            )
+
+
+import patterns
+
+def default_pattern():
+    class TestPattern(patterns.Pattern):
+        def pattern_at(self, local_pt):
+            return color.color(local_pt[0], local_pt[1], local_pt[2])
+
+    return TestPattern()
+
+def _test_refracted_color3():
+    w = default_world()
+    A = w.objects[0]
+    A.material.ambient = 1.0
+    A.material.patttern = default_pattern()
+
+    B = w.objects[1]
+    B.material.transparency = 1.0
+    B.material.refractive_index = 1.5
+
+    r = ray.ray(base.point(0, 0, 0.1), base.vector(0, 1, 0))
+    xs = ray.intersections(
+            ray.intersection(-0.9899, A),
+            ray.intersection(-0.4899, B),
+            ray.intersection(0.4899, B),
+            ray.intersection(0.9899, A)
+            )
+    comps = world.prepare_computations(xs[2], r, xs)
+    col = world.refracted_color(w, comps, 5)
+    assert color.equals(
+            col,
+            color.color(0., 0.99888, 0.04725)
+            )
+
+
+def test_shade_hit5():
+    """shade_hit() with a transparent material"""
+    w = default_world()
+    floor = shapes.plane()
+    floor.transform = transform.translation(0, -1, 0)
+    floor.material.transparency = 0.5
+    floor.material.refractive_index = 1.5
+    w.add_objs(floor)
+
+    ball = shapes.sphere()
+    ball.material.color = color.color(1, 0, 0)
+    ball.material.ambient = 0.5
+    ball.transform = transform.translation(0, -3.5, -.5)
+    w.add_objs(ball)
+
+    r = ray.ray(base.point(0, 0, -3), base.vector(0, -math.sqrt(2)/2, math.sqrt(2)/2))
+    xs = ray.intersections(
+            ray.intersection(math.sqrt(2), floor)
+            )
+    comps = world.prepare_computations(xs[0], r, xs)
+    col = world.shade_hit(w, comps, 5)
+    assert color.equals(
+            col,
+            color.color(0.93642, 0.68642, 0.68642)
+            )
+
+def test_schlick():
+    shape = shapes.glass_sphere()
+    r = ray.ray(base.point(0, 0, math.sqrt(2)/2), base.vector(0, 1, 0))
+    xs = ray.intersections(
+            ray.intersection(-math.sqrt(2)/2, shape),
+            ray.intersection(math.sqrt(2)/2, shape)
+            )
+    comps = world.prepare_computations(xs[1], r, xs)
+    reflectance = world.schlick(comps)
+    assert utils.fequals(reflectance, 1.)
+
+
+def test_schlick2():
+    """schlick approximation with a perpendicular viewing angle"""
+    shape = shapes.glass_sphere()
+    r = ray.ray(base.point(0, 0, 0), base.vector(0, 1, 0))
+    xs = ray.intersections(
+            ray.intersection(-1, shape),
+            ray.intersection(1, shape)
+            )
+    comps = world.prepare_computations(xs[1], r, xs)
+    reflectance = world.schlick(comps)
+    assert utils.fequals(reflectance, 0.04)
+
+
+def test_schlick3():
+    """schlick approximation with small angle and n2 >  n1"""
+    shape = shapes.glass_sphere()
+    r = ray.ray(base.point(0, 0.99, -2), base.vector(0, 0, 1))
+    xs = ray.intersections(
+            ray.intersection(1.8589, shape)
+            )
+    comps = world.prepare_computations(xs[0], r, xs)
+    reflectance = world.schlick(comps)
+    assert utils.fequals(reflectance, 0.48873)
+
+
+def test_shade_hit6():
+    w = default_world()
+    r = ray.ray(base.point(0, 0, -3), base.vector(0, -math.sqrt(2)/2, math.sqrt(2)/2))
+    floor = shapes.plane()
+    floor.transform = transform.translation(0, -1, 0)
+    floor.material.reflective = 0.5
+    floor.material.transparency = .5
+    floor.material.refractive_index = 1.5
+
+    ball = shapes.sphere()
+    ball.material.color = color.color(1, 0, 0)
+    ball.material.ambient = 0.5
+    ball.transform = transform.translation(0, -3.5, -0.5)
+
+    w.add_objs(floor, ball)
+    xs = ray.intersections(
+            ray.intersection(math.sqrt(2), floor)
+            )
+    comps = world.prepare_computations(xs[0], r, xs)
+    col = world.shade_hit(w, comps)
+    assert color.equals(
+            col,
+            color.color(0.93391, 0.69643, 0.69243)
+            )

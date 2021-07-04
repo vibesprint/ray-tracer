@@ -6,6 +6,8 @@ import light
 
 import utils
 
+import math
+
 class world:
     def __init__(self):
         self.objects = []
@@ -23,7 +25,7 @@ def intersect_world(wrld, r):
 
 
 class computation:
-    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point", "reflectv", "n1", "n2"]
+    __slots__ = ["t", "object", "point", "eyev", "normalv", "inside", "over_point", "reflectv", "n1", "n2", "under_point"]
     pass
 
 EPSILON = 0.00001
@@ -43,6 +45,7 @@ def prepare_computations(i, r, ints=None):
         comps.normalv = base.negate(comps.normalv)
 
     comps.over_point = base.add(comps.point, base.scalar_mul(comps.normalv, EPSILON))
+    comps.under_point = base.sub(comps.point, base.scalar_mul(comps.normalv, EPSILON))
     comps.reflectv = light.reflect(r.direction, comps.normalv)
 
 
@@ -82,8 +85,20 @@ def shade_hit(w, comps, recur_thresh=4):
             w.light_source,
             comps.over_point, comps.eyev, comps.normalv,
             shadowed)
-    reflected = reflected_color(w, comps, recur_thresh-1)
-    return base.add(surface, reflected)
+    reflected = reflected_color(w, comps, recur_thresh)
+    refracted = refracted_color(w, comps, recur_thresh)
+
+    material = comps.object.material
+    if material.reflective > 0 and material.transparency > 0:
+        reflectance = schlick(comps)
+        return base.add(surface,
+                base.add(
+                    base.scalar_mul(reflected, reflectance),
+                    base.scalar_mul(refracted, 1. - reflectance)
+                    )
+                )
+
+    return base.add(base.add(surface, reflected), refracted)
 
 
 def color_at(wrld, r, recur_thresh=4):
@@ -110,8 +125,44 @@ def is_shadowed(wrld, point):
     return False
 
 def reflected_color(wrld, comps, recur_thresh=4):
-    if utils.fequals(comps.object.material.reflective, 0) or recur_thresh < 0:
+    if utils.fequals(comps.object.material.reflective, 0) or recur_thresh <= 0:
         return color.color(0, 0, 0)
     reflect_ray = ray.ray(comps.over_point, comps.reflectv)
     col = color_at(wrld, reflect_ray, recur_thresh-1)
     return base.scalar_mul(col, comps.object.material.reflective)
+
+
+def refracted_color(wrld, comps, recur_thresh=4):
+    if utils.fequals(comps.object.material.transparency, 0) or recur_thresh <= 0:
+        return color.color(0, 0, 0)
+
+    n_ratio = comps.n1/comps.n2
+    cos_i = base.dot(comps.eyev, comps.normalv)
+    sin2_t = n_ratio**2 * (1 - cos_i**2)
+
+    if sin2_t > 1:
+        return color.color(0, 0, 0)
+
+    cos_t = math.sqrt(1. - sin2_t)
+    direction = base.sub(
+            base.scalar_mul(comps.normalv, n_ratio*cos_i - cos_t),
+            base.scalar_mul(comps.eyev, n_ratio)
+            )
+
+    refract_ray = ray.ray(comps.under_point, direction)
+
+    return base.scalar_mul(color_at(wrld, refract_ray, recur_thresh-1), comps.object.material.transparency)
+
+
+def schlick(comps):
+    cos = base.dot(comps.eyev, comps.normalv)
+    if comps.n1 > comps.n2:
+        n = comps.n1 / comps.n2
+        sin2_t = n**2 * (1. - cos**2)
+        if sin2_t > 1.:
+            return 1.
+
+        cos = math.sqrt(1. - sin2_t)
+
+    r0 = ((comps.n1 - comps.n2) / (comps.n1 + comps.n2)) ** 2
+    return r0 + (1 - r0) * (1 - cos)**5

@@ -16,8 +16,8 @@ def make_walls():
     plane.material.color = color.color(1, 0.9, 0.9)
     plane.material.specular = 0
     plane.material.pattern = patterns.checkers_pattern(
-            color.color(0.9, 0.75, 0.8),
-            color.color(0.9, 0.9, 0.9)
+            color.color(1, 1, 1),
+            color.color(0, 0, 0)
             )
 
     plane.material.pattern.transform = transform.rotation_y(math.pi/3)
@@ -39,7 +39,6 @@ def make_spheres():
             color.color(0.9, 0.75, 0.8),
             color.color(0.9, 0.9, 0.9)
             )
-    middle.material.pattern.transform = transform.rotation_z(math.pi/3)
 
     right = shapes.sphere()
     right.transform = transform.compose(
@@ -74,7 +73,7 @@ def main():
 
     cam = camera.camera(600, 300, math.pi/3)
     cam.transform = transform.view_transform(
-            base.point(0, 1.5, -5),
+            base.point(0, 2.5, -10),
             base.point(0, 1, 0),
             base.vector(0, 1, 0)
             )
