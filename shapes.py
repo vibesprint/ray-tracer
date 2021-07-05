@@ -99,3 +99,54 @@ class glass_sphere(sphere):
         sphere.__init__(self)
         self.material.transparency = 1.0
         self.material.refractive_index = 1.5
+
+
+class cube(Shape):
+    def __init__(self):
+        Shape.__init__(self)
+
+    def local_intersect(self, r):
+        xtmin, xtmax = self.check_axis(r.origin[0], r.direction[0])
+        ytmin, ytmax = self.check_axis(r.origin[1], r.direction[1])
+        ztmin, ztmax = self.check_axis(r.origin[2], r.direction[2])
+
+        tmin = max(xtmin, ytmin, ztmin)
+        tmax = min(xtmax, ytmax, ztmax)
+
+        if tmin > tmax:
+            return ray.intersections()
+
+        return ray.intersections(
+                ray.intersection(tmin, self),
+                ray.intersection(tmax, self)
+                )
+
+
+    def check_axis(self, orig, direction):
+        tmin_numerator = (-1 - orig)
+        tmax_numerator = (1 - orig)
+
+        if abs(direction) > utils.EPSILON:
+            tmin = tmin_numerator / direction
+            tmax = tmax_numerator / direction
+
+        else:
+            tmin = tmin_numerator * float('inf')
+            tmax = tmax_numerator * float('inf')
+
+        if tmin > tmax:
+            tmin, tmax = tmax, tmin
+
+        return tmin, tmax
+
+
+    def local_normal_at(self, pt):
+        maxc = max(abs(i) for i in pt)
+
+        if maxc == abs(pt[0]):
+            return base.vector(pt[0], 0, 0)
+
+        if maxc == abs(pt[1]):
+            return base.vector(0, pt[1], 0)
+
+        return base.vector(0, 0, pt[2])
