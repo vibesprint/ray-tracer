@@ -253,3 +253,148 @@ def test_glass_sphere():
     assert matrix.equals(s.transform, matrix.identity_matrix())
     assert utils.fequals(s.material.transparency, 1)
     assert utils.fequals(s.material.refractive_index, 1.5)
+
+
+def cube_test(r_orig, r_dir, t1, t2):
+    """A ray intersects a cube"""
+    c = shapes.cube()
+    r = ray.ray(r_orig, r_dir)
+    xs = c.local_intersect(r)
+    assert xs.count == 2
+    assert utils.fequals(xs[0].t, t1)
+    assert utils.fequals(xs[1].t, t2)
+
+
+def test_cube():
+    cube_test(
+            base.point(5, .5, 0),
+            base.vector(-1, 0, 0),
+            4, 6
+            )
+
+    cube_test(
+            base.point(-5, .5, 0),
+            base.vector(1, 0, 0),
+            4, 6
+            )
+
+    cube_test(
+            base.point(.5, 5, 0),
+            base.vector(0, -1, 0),
+            4, 6
+            )
+
+    cube_test(
+            base.point(.5, -5, 0),
+            base.vector(0, 1, 0),
+            4, 6
+            )
+
+    cube_test(
+            base.point(.5, 0, 5),
+            base.vector(0, 0, -1),
+            4, 6
+            )
+
+    cube_test(
+            base.point(.5, 0, -5),
+            base.vector(0, 0, 1),
+            4, 6
+            )
+
+    cube_test(
+            base.point(0, .5, 0),
+            base.vector(0, 0, 1),
+            -1, 1
+            )
+
+
+def cube_test2(orig, direction):
+    """Ray misses the cube"""
+    c = shapes.cube()
+    r = ray.ray(orig, direction)
+    xs = c.local_intersect(r)
+    assert xs.count == 0
+
+
+def test_cube2():
+    """Ray misses the cube"""
+    cube_test2(
+            base.point(-2, 0, 0),
+            base.vector(.2673, .5354, .8018)
+            )
+
+    cube_test2(
+            base.point(0, -2, 0),
+            base.vector(.8018, .2673, .5345)
+            )
+
+    cube_test2(
+            base.point(0, 0, -2),
+            base.vector(.5354, .8018, .2673)
+            )
+
+    cube_test2(
+            base.point(2, 0, 2),
+            base.vector(0, 0, -1)
+            )
+
+    cube_test2(
+            base.point(0, 2, 2),
+            base.vector(0, -1, 0)
+            )
+
+    cube_test2(
+            base.point(2, 2, 0),
+            base.vector(-1, 0, 0)
+            )
+
+
+def cube_normal_test(point, normal):
+    c = shapes.cube()
+    p = base.point(*point)
+    n = base.vector(*normal)
+    normal = c.local_normal_at(p)
+    assert base.equals(normal, n)
+
+
+def test_cube_local_normal_at():
+    cube_normal_test(
+            (1, .5, -.8),
+            (1, 0, 0)
+            )
+
+    cube_normal_test(
+            (-1, -.2, .9),
+            (-1, 0, 0)
+            )
+
+    cube_normal_test(
+           (-.4, 1, -.1),
+           (0, 1, 0)
+           )
+
+    cube_normal_test(
+           (.3, -1, -.7),
+           (0, -1, 0)
+           )
+
+    cube_normal_test(
+           (-.6, .3, 1),
+           (0, 0, 1)
+           )
+
+    cube_normal_test(
+           (.4, .4, -1),
+           (0, 0, -1)
+           )
+
+    cube_normal_test(
+           (1, 1, 1),
+           (1, 0, 0)
+           )
+
+    cube_normal_test(
+           (-1, -1, -1),
+           (-1, 0, 0)
+           )
