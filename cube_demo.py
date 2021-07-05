@@ -77,7 +77,7 @@ def main():
     wrld.light_source = light.point_light(base.point(-10, 10, -10), color.color(1, 1, 1))
     wrld.add_objs(*(walls + spheres))
 
-    cam = camera.camera(1200, 600, math.pi/3)
+    cam = camera.camera(600, 300, math.pi/3)
     cam.transform = transform.view_transform(
             base.point(0, 1.5, -5),
             base.point(0, 1, 0),
