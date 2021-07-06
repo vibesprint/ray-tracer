@@ -150,3 +150,7 @@ class cube(Shape):
             return base.vector(0, pt[1], 0)
 
         return base.vector(0, 0, pt[2])
+
+
+
+from cylinder import *
