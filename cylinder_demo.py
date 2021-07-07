@@ -14,11 +14,11 @@ import math
 
 def make_walls():
     wall = shapes.plane()
-    wall.material.color = color.color(1, 1, 1)
+    wall.material.color = color.color(.5, .6, .7)
     wall.transform = transform.rotation_x(math.pi/2)
 
     right_wall = shapes.plane()
-    right_wall.material.color = color.color(1, 1, 1)
+    right_wall.material.color = color.color(0, 0, 1)
     right_wall.transform = transform.compose(
             transform.rotation_x(math.pi/2),
             transform.rotation_y(math.pi/2)
@@ -35,7 +35,7 @@ def make_cylinders():
     cyl.maximum = 1
     cyl.minimum = 0
     cyl.material.color = color.color(1, 1, 1)
-    cyl.transform = transform.translation(-1, 0, -1)
+    cyl.transform = transform.translation(-.5, 0, -1.7)
 
     return [cyl]
 
@@ -53,7 +53,7 @@ def main():
 
     cam = camera.camera(600, 300, math.pi/2)
     cam.transform = transform.view_transform(
-            base.point(0, 2, -7),
+            base.point(-1, 2, -7),
             base.point(0, 1, 0),
             base.vector(0, 1, 0)
             )
