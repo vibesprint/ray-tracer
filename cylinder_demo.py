@@ -35,7 +35,7 @@ def make_cylinders():
     cyl.maximum = 1
     cyl.minimum = 0
     cyl.material.color = color.color(1, 1, 1)
-    cyl.transform = transform.translation(-.5, 0, -.8)
+    cyl.transform = transform.translation(-1, 0, -1)
 
     return [cyl]
 
@@ -47,13 +47,13 @@ def main():
     wrld = world.world()
     wrld.add_objs(*walls, *cyls)
     wrld.light_source = light.point_light(
-            base.point(-10, 5, -10),
+            base.point(-10, 10, -10),
             color.color(1, 1, 1)
             )
 
-    cam = camera.camera(600, 300, math.pi/3)
+    cam = camera.camera(600, 300, math.pi/2)
     cam.transform = transform.view_transform(
-            base.point(-1, 3, -2),
+            base.point(0, 2, -7),
             base.point(0, 1, 0),
             base.vector(0, 1, 0)
             )
