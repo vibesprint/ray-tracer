@@ -68,7 +68,7 @@ def test_cylinder_intersect_at2():
 
 def cylinder_normal_at(pt, normal):
     cyl = shapes.cylinder()
-    exp_normal = cyl.normal_at(base.point(*pt))
+    exp_normal = cyl.local_normal_at(base.point(*pt))
     assert base.equals(base.vector(*normal), exp_normal)
 
 def test_normal_at():
@@ -152,3 +152,89 @@ def test_cylinder_truncation():
 def test_cylinder2():
     cyl = shapes.cylinder()
     assert cyl.closed == False
+
+
+def cylinder_intersect_cap(orig, direction, count):
+    cyl = shapes.cylinder()
+    cyl.minimum = 1
+    cyl.maximum = 2
+    cyl.closed = True
+    direction = base.normalize(direction)
+    r = ray.ray(orig, direction)
+    xs = cyl.local_intersect(r)
+    assert xs.count == count
+
+
+def test_cylinder3():
+    cylinder_intersect_cap(
+            (0, 3, 0),
+            (0, -1, 0),
+            2
+            )
+
+    cylinder_intersect_cap(
+            (0, 3, -2),
+            (0, -1, 2),
+            2
+            )
+
+    cylinder_intersect_cap(
+            (0, 4, -2),
+            (0, -1, 1),
+            2
+            )
+
+    cylinder_intersect_cap(
+            (0, 0, -2),
+            (0, 1, 2),
+            2
+            )
+
+    cylinder_intersect_cap(
+            (0, -1, -2),
+            (0, 1, 1),
+            2
+            )
+
+
+def cylinder_normal_caps(point, normal):
+    cyl = shapes.cylinder()
+    cyl.minimum = 1
+    cyl.maximum = 2
+    cyl.closed = True
+    point = base.point(*point)
+    n = cyl.local_normal_at(point)
+    normal = base.vector(*normal)
+    assert base.equals(normal, n)
+
+
+def test_cylinder_normal_at():
+    cylinder_normal_caps(
+            (0, 1, 0),
+            (0, -1, 0)
+            )
+
+    cylinder_normal_caps(
+            (.5, 1, 0),
+            (0, -1, 0)
+            )
+
+    cylinder_normal_caps(
+            (0, 1, .5),
+            (0, -1, 0)
+            )
+
+    cylinder_normal_caps(
+            (0, 2, 0),
+            (0, 1, 0)
+            )
+
+    cylinder_normal_caps(
+            (.5, 2, 0),
+            (0, 1, 0)
+            )
+
+    cylinder_normal_caps(
+            (0, 2, .5),
+            (0, 1, 0)
+            )
