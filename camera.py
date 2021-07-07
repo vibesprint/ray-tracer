@@ -58,7 +58,8 @@ def _worker(cam, wrld, row, cols, outqueue):
             r = ray_for_pixel(cam, x, row)
             col = world.color_at(wrld, r)
             outqueue.put((x, row, col))
-    except:
+    except Exception as ex:
+        print(f"[-] Error: {ex}")
         return
 
 
