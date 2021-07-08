@@ -398,3 +398,54 @@ def test_cube_local_normal_at():
            (-1, -1, -1),
            (-1, 0, 0)
            )
+
+
+
+def test_shape_has_parent():
+    shape = default_shape()
+    assert shape.parent is None
+
+
+import group
+
+def test_world_to_object():
+    g1 = group.group()
+    g1.transform = transform.rotation_y(math.pi/2)
+    g2 = group.group()
+    g2.transform = transform.scale(2, 2, 2)
+    g1.add_child(g2)
+    s = shapes.sphere()
+    s.transform = transform.translation(5, 0, 0)
+    g2.add_child(s)
+    p = shapes.world_to_object(s, base.point(-2, 0, -10))
+    assert base.equals(p, base.point(0, 0, -1))
+
+
+
+def test_normal_to_world():
+    g1 = group.group()
+    g1.transform = transform.rotation_y(math.pi/2)
+    g2 = group.group()
+    g2.transform = transform.scale(1, 2, 3)
+    g1.add_child(g2)
+    s = shapes.sphere()
+    s.transform = transform.translation(5, 0, 0)
+    g2.add_child(s)
+    const = math.sqrt(3)/3
+    v = shapes.normal_to_world(s, base.vector(const, const, const))
+    assert base.equals(v, base.vector(0.28571, 0.42857, -0.85714))
+
+
+
+def test_normal_at8():
+    g1 = group.group()
+    g1.transform = transform.rotation_y(math.pi/2)
+    g2 = group.group()
+    g2.transform = transform.scale(1, 2, 3)
+    g1.add_child(g2)
+    s = shapes.sphere()
+    s.transform = transform.translation(5, 0, 0)
+    g2.add_child(s)
+    const = math.sqrt(3)/3
+    v = shapes.normal_at(s, base.point(1.7321, 1.1547, -5.5774))
+    assert base.equals(v, base.vector(0.285703, 0.42854, -0.85716))

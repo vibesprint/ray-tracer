@@ -3,6 +3,7 @@ import math
 import matrix
 import transformation as transform
 import base
+import shapes
 
 
 class Pattern:
@@ -10,10 +11,7 @@ class Pattern:
         self.transform = matrix.identity_matrix()
 
     def pattern_at_shape(self, obj, world_pt):
-        object_point = transform.apply(
-                matrix.inverse(obj.transform),
-                world_pt
-                )
+        object_point = shapes.world_to_object(obj, world_pt)
 
         pattern_point = transform.apply(matrix.inverse(self.transform), object_point)
         return self.pattern_at(pattern_point)
