@@ -13,6 +13,7 @@ class Shape:
     def __init__(self):
         self.transform = matrix.identity_matrix()
         self.material = material.material()
+        self.parent = None
 
     def __eq__(self, other):
         return matrix.equals(self.transform, other.transform) and \
@@ -55,19 +56,11 @@ class sphere(Shape):
 
 
 def normal_at(shape, pt):
-    local_point = transform.apply(
-            matrix.inverse(shape.transform),
-            pt)
+    local_point = world_to_object(shape, pt)
 
     local_normal = shape.local_normal_at(local_point)
 
-    world_normal = matrix.mul(
-            matrix.transpose(matrix.inverse(shape.transform)),
-            local_normal
-            )
-
-    world_normal[3] = 0
-    return base.normalize(world_normal)
+    return normal_to_world(shape, local_normal)
 
 def reflect(vect, normal):
     return base.sub(
@@ -154,3 +147,29 @@ class cube(Shape):
 
 
 from cylinder import *
+
+
+def world_to_object(shape, point):
+    if shape.parent is not None:
+        point = world_to_object(shape.parent, point)
+
+    return transform.apply(
+            matrix.inverse(shape.transform),
+            point
+            )
+
+
+
+def normal_to_world(shape, normal):
+    normal = transform.apply(
+            matrix.transpose(matrix.inverse(shape.transform)),
+            normal
+            )
+
+    normal[3] = 0
+    normal = base.normalize(normal)
+
+    if shape.parent is not None:
+        return normal_to_world(shape.parent, normal)
+
+    return normal
