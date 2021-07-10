@@ -173,3 +173,49 @@ def normal_to_world(shape, normal):
         return normal_to_world(shape.parent, normal)
 
     return normal
+
+
+
+class triangle(Shape):
+    def __init__(self, p1, p2, p3):
+        Shape.__init__(self)
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
+        self.e1 = base.sub(self.p2, self.p1)
+        self.e2 = base.sub(self.p3, self.p1)
+        self.normal = base.normalize(base.cross(self.e2, self.e1))
+
+
+    def local_normal_at(self, pt):
+        return self.normal
+
+    def local_intersect(self, r):
+        dir_cross_e2 = base.cross(r.direction, self.e2)
+        det = base.dot(self.e1, dir_cross_e2)
+
+        print(f"det: {det}\ndir_cross_e2: {dir_cross_e2}")
+        if utils.fequals(det, 0):
+            return ray.intersections()
+
+        f = 1.0 / det
+        p1_to_origin = base.sub(r.origin, self.p1)
+        u = f * base.dot(p1_to_origin, dir_cross_e2)
+
+        print(f"f: {f}\np1_to_origin: {p1_to_origin}\nu: {u}")
+        if u < 0 or u > 1:
+            return ray.intersections()
+
+        origin_cross_e1 = base.cross(p1_to_origin, self.e1)
+        v = f * base.dot(r.direction, origin_cross_e1)
+
+        print(f"origin_cross_e1: {origin_cross_e1}\nv: {v}")
+        if v < 0 or (u + v) > 1:
+            return ray.intersections()
+
+        t = f * base.dot(self.e2, origin_cross_e1)
+
+        print(f"t: {t}\ne2_dot_origin_cross_e1: {base.dot(self.e2, origin_cross_e1)}")
+        return ray.intersections(
+                ray.intersection(t, self)
+                )
