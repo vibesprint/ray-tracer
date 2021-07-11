@@ -19,6 +19,10 @@ class group(shapes.Shape):
         child.parent = self
 
 
+    def __getitem__(self, idx):
+        return self._shapes[idx]
+
+
     def local_intersect(self, r):
         ints = []
         for child in self._shapes:
