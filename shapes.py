@@ -213,5 +213,14 @@ class triangle(Shape):
         t = f * base.dot(self.e2, origin_cross_e1)
 
         return ray.intersections(
-                ray.intersection(t, self)
+                ray.intersection_with_uv(t, self, u, v)
                 )
+
+
+class smooth_triangle(triangle):
+
+    def __init__(self, p1, p2, p3, n1, n2, n3):
+        triangle.__init__(self, p1, p2, p3)
+        self.n1 = n1
+        self.n2 = n2
+        self.n3 = n3

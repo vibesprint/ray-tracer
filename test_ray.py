@@ -213,3 +213,10 @@ def test_intersectt8():
     s.set_transform(transform.translation(5, 0, 0))
     ints = ray.intersect(s, r)
     assert ints.count == 0
+
+
+def test_interstion_with_uv():
+    s = shapes.triangle(base.point(0, 1, 0), base.point(-1, 0, 0), base.point(1, 0, 0))
+    i = ray.intersection_with_uv(3.5, s, .2, .4)
+    assert i.u == .2
+    assert i.v == .4
