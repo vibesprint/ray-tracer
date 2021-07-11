@@ -54,10 +54,14 @@ def ray_for_pixel(cam, px, py):
 
 def _worker(cam, wrld, row, cols, outqueue):
     try:
+        rendered_row = [None] * cols
+        cur_idx = 0
         for x in range(cols):
             r = ray_for_pixel(cam, x, row)
             col = world.color_at(wrld, r)
-            outqueue.put((x, row, col))
+            rendered_row[cur_idx] = col
+            cur_idx += 1
+        outqueue.put((row, rendered_row))
     except Exception as ex:
         print(f"[-] Error: {ex}")
         return
@@ -83,9 +87,9 @@ def render(cam, wrld, *, progress_bar=False, **opts):
             row_range = range(cam.vsize)
 
         for i in row_range:
-            for _ in range(cam.hsize):
-                x, y, col = outqueue.get()
-                canvas.write_pixel(img, x, y, col)
+            row, row_data = outqueue.get()
+            for j in range(cam.hsize):
+                canvas.write_pixel(img, row, j, row_data[j])
 
         pool.close()
         pool.join()
