@@ -55,10 +55,13 @@ class sphere(Shape):
 
 
 
-def normal_at(shape, pt):
+def normal_at(shape, pt, hit=None):
     local_point = world_to_object(shape, pt)
 
-    local_normal = shape.local_normal_at(local_point)
+    if type(shape) is smooth_triangle:
+        local_normal = shape.local_normal_at(local_point, hit)
+    else:
+        local_normal = shape.local_normal_at(local_point)
 
     return normal_to_world(shape, local_normal)
 
@@ -224,3 +227,13 @@ class smooth_triangle(triangle):
         self.n1 = n1
         self.n2 = n2
         self.n3 = n3
+
+
+    def local_normal_at(self, point, hit):
+        return base.add(
+                base.scalar_mul(self.n2, hit.u),
+                base.add(
+                    base.scalar_mul(self.n3, hit.v),
+                    base.scalar_mul(self.n1, 1 - hit.v - hit.u)
+                    )
+                )

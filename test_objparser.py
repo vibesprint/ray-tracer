@@ -122,3 +122,44 @@ f 1 3 4
     g = parser.obj_to_group(result)
     assert result.get_group('FirstGroup') in g
     assert result.get_group('SecondGroup') in g
+
+
+def test_parse_obj_file7():
+    """Vertex normal data should be properly imported"""
+    file = """
+vn 0 0 1
+vn 0.707 0 -0.707
+vn 1 2 3
+"""
+
+    result = parser.parse_obj_file(file)
+    normals = result.normals
+    assert base.equals(normals[1], base.vector(0, 0, 1))
+    assert base.equals(normals[2], base.vector(.707, 0, -.707))
+    assert base.equals(normals[3], base.vector(1, 2, 3))
+
+
+def test_parse_obj_file8():
+    file = """
+v 0 1 0
+v -1 0 0
+v 1 0 0
+vn -1 0 0
+vn 1 0 0
+vn 0 1 0
+f 1//3 2//1 3//2
+f 1/0/3 2/102/1 3/14/2
+"""
+
+    result = parser.parse_obj_file(file)
+    g = result.default_group
+    t1 = g[0]
+    t2 = g[1]
+
+    assert base.equals(t1.p1, result.vertices[1])
+    assert base.equals(t1.p2, result.vertices[2])
+    assert base.equals(t1.p3, result.vertices[3])
+    assert base.equals(t1.n1, result.normals[3])
+    assert base.equals(t1.n2, result.normals[1])
+    assert base.equals(t1.n3, result.normals[2])
+    assert t1 == t2
