@@ -3,6 +3,8 @@ import color
 import base
 import ray
 
+import utils
+
 
 def test_triangle():
     p1 = base.point(0, 1, 0)
@@ -88,3 +90,29 @@ def test_tri_local_intersect5():
     xs = t.local_intersect(r)
     assert xs.count == 1
     assert xs[0].t == 2
+
+
+def make_smooth_tri():
+    p1 = base.point(0, 1, 0)
+    p2 = base.point(-1, 0, 0)
+    p3 = base.point(1, 0, 0)
+    n1 = base.vector(0, 1, 0)
+    n2 = base.vector(-1, 0, 0)
+    n3 = base.vector(1, 0, 0)
+
+    return shapes.smooth_triangle(p1, p2, p3, n1, n2, n3)
+
+
+def test_smooth_local_intersect():
+    tri = make_smooth_tri()
+    r = ray.ray(base.point(-.2, .3, -2), base.vector(0, 0, 1))
+    xs = tri.local_intersect(r)
+    assert utils.fequals(xs[0].u, .45)
+    assert utils.fequals(xs[0].v, .25)
+
+
+def test_smooth_normal_at():
+    tri = make_smooth_tri()
+    i = ray.intersection_with_uv(1, tri, .45, .25)
+    n = tri.normal_at(base.point(0, 0, 0), i)
+    assert base.equals(n, base.vector(-.5547, .83205, 0))
