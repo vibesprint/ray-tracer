@@ -38,7 +38,7 @@ def prepare_computations(i, r, ints=None):
     comps.object = i.object
     comps.point = ray.position(r, comps.t)
     comps.eyev = base.negate(r.direction)
-    comps.normalv = shapes.normal_at(comps.object, comps.point)
+    comps.normalv = shapes.normal_at(comps.object, comps.point, ray.hit(ints))
     comps.inside = False
     if base.dot(comps.normalv, comps.eyev) < 0:
         comps.inside = True

@@ -2,6 +2,7 @@ import shapes
 import color
 import base
 import ray
+import world
 
 import utils
 
@@ -114,5 +115,13 @@ def test_smooth_local_intersect():
 def test_smooth_normal_at():
     tri = make_smooth_tri()
     i = ray.intersection_with_uv(1, tri, .45, .25)
-    n = tri.normal_at(base.point(0, 0, 0), i)
+    n = shapes.normal_at(tri, base.point(0, 0, 0), i)
     assert base.equals(n, base.vector(-.5547, .83205, 0))
+
+
+def test_smooth_prepare_computation():
+    i = ray.intersection_with_uv(1, make_smooth_tri(), .45, .25)
+    r = ray.ray(base.point(-.2, .3, -2), base.vector(0, 0, 1))
+    xs = ray.intersections(i)
+    comps = world.prepare_computations(i, r, xs)
+    assert base.equals(comps.normalv, base.vector(-.5547, .83205, 0))
