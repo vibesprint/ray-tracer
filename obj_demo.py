@@ -51,7 +51,7 @@ def main():
 
     cam = camera.camera(300, 150, math.pi/2)
     cam.transform = transform.view_transform(
-            base.point(1, 2, -6),
+            base.point(1, 2, -16),
             base.point(0, 0, 0),
             base.vector(0, 1, 0)
             )
