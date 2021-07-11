@@ -89,7 +89,7 @@ def render(cam, wrld, *, progress_bar=False, **opts):
         for i in row_range:
             row, row_data = outqueue.get()
             for j in range(cam.hsize):
-                canvas.write_pixel(img, row, j, row_data[j])
+                canvas.write_pixel(img, j, row, row_data[j])
 
         pool.close()
         pool.join()
