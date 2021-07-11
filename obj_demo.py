@@ -22,6 +22,7 @@ def get_model():
 
     print(f'[*] Parsing the model file ...')
     parse_res = objparser.parse_obj_file(file)
+    print(f"[*] No. of lines ignored: {parse_res.ignored_lines}")
     print(f"[+] Parsing done")
     return objparser.obj_to_group(parse_res)
 
