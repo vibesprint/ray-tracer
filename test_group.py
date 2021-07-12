@@ -28,11 +28,11 @@ def default_shape():
 def test_group_add_child():
     grp = group.group()
     shape = default_shape()
-    grp.add_child(grp)
+    grp.add_child(shape)
 
     assert len(grp) > 0
     assert shape in grp
-    assert grp.parent is grp
+    assert shape.parent is grp
 
 
 def test_group_local_intersect():

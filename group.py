@@ -1,5 +1,6 @@
 import shapes
 import ray
+import csg
 
 
 class group(shapes.Shape):
@@ -21,6 +22,17 @@ class group(shapes.Shape):
 
     def __getitem__(self, idx):
         return self._shapes[idx]
+
+    def __contains__(self, obj):
+        for shape in self._shapes:
+            if type(shape) is group or type(shape) is csg.csg:
+                if obj in shape:
+                    return True
+
+            if obj == shape:
+                return True
+
+        return False
 
 
     def local_intersect(self, r):
