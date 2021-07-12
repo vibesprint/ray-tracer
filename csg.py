@@ -3,8 +3,9 @@ import group
 import ray
 
 
-class csg:
+class csg(shapes.Shape):
     def __init__(self, operation, left, right):
+        shapes.Shape.__init__(self)
         left.parent = self
         right.parent = self
         self.left = left
