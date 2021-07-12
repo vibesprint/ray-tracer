@@ -16,6 +16,12 @@ class Shape:
         self.parent = None
 
     def __eq__(self, other):
+        if self is other:
+            return True
+
+        if type(other) is not type(self):
+            return False
+
         return matrix.equals(self.transform, other.transform) and \
                 self.material == other.material
 
